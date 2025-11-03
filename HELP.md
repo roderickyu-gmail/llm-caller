@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'com.xmb.llm-requester' is invalid and this project uses 'com.xmb.llm_requester' instead.
+* The original package name 'com.hoocta.llm-requester' is invalid and this project uses 'com.hoocta.llm_requester' instead.
 
 # Getting Started
 

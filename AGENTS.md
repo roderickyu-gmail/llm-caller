@@ -1,22 +1,22 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Library code lives under `src/main/java/com/xmb/llm/requester`. `core/` carries the OpenAI-style request pipeline, `http/` manages Apache HttpClient reuse, `utils/` holds shared helpers, and `constants/` lists cross-cutting enums. Configuration defaults belong in `src/main/resources/application.properties`. Mirror the production package tree under `src/test/java` for automated tests.
-
-## LLM Client Configuration
-Define endpoints in consuming apps with `LLMEndpoint.builder()` and group them via `LLMClientConfiguration`. Instantiate an `LLMClient`, register it with `LLMClientRegistry.setDefault(...)`, and wire custom clients into requesters when you need isolation. Pull secrets from environment managers rather than source and feed them through `apiKeySupplier`; avoid hard-coding keys. Adjust behaviour per call using `LLMRequestOptions`—for example set `temperature`, `maxTokens`, or streaming flags to match your workload.
+Application code lives under `src/main/java/com/hoocta/llm/requester`, with `core/` handling the request pipeline, `http/` managing reusable Apache HttpClient assets, `utils/` housing shared helpers, and `constants/` keeping enums. Store safe defaults in `src/main/resources/application.properties`. Mirror the production package tree under `src/test/java` so tests line up with the code they verify, and keep repository documentation at the root.
 
 ## Build, Test, and Development Commands
-Use `./mvnw clean verify` to compile and run tests; during quick edits `./mvnw test` is enough. Inspect dependencies with `./mvnw dependency:tree` when proposing new libraries, and always rely on the Maven wrapper to avoid version drift.
+- `./mvnw clean verify` — full compile, unit tests, and integration checks; run before pushing.
+- `./mvnw test` — fast unit-test cycle during development.
+- `./mvnw dependency:tree` — inspect dependency impact before proposing new libraries.
+Use the Maven wrapper consistently to avoid local version drift.
 
 ## Coding Style & Naming Conventions
-Keep Java sources tab-indented with K&R braces. Document public entry points briefly and comment only when logic is non-obvious. Follow `PascalCase` for types, `camelCase` for methods, and `UPPER_SNAKE` for constants.
+Write Java with tabs and K&R braces. Favor single-purpose methods, and add brief Javadoc only when behavior is non-obvious. Stick to PascalCase types, camelCase methods and variables, and UPPER_SNAKE constants; keep package names lowercase and descriptive. Ensure files end with a newline and avoid trailing whitespace.
 
 ## Testing Guidelines
-Write JUnit 5 tests under mirrored packages in `src/test/java`, naming classes `${ClassName}Test` and methods `should...`. Mock HTTP seams with Mockito or light fakes, and ensure failing tests reproduce defects before applying fixes.
+Tests use JUnit 5 and Mockito. Name classes `${ClassName}Test` and methods `should...` to capture expected behavior. Place fixtures under `src/test/resources` and fake HTTP seams rather than hitting real services. Reproduce defects with failing tests before fixes, and run `./mvnw test` prior to any commit.
 
 ## Commit & Pull Request Guidelines
-Keep commit messages concise, present-tense, and under 60 characters. Run `./mvnw clean` before staging to avoid `target/` artifacts. Pull requests should explain the change, link tracking issues, and capture evidence (screenshots or curl logs) for new endpoints or behaviours.
+Keep commit messages present-tense, ≤60 characters, and scoped to one change (e.g., `Add retry policy to LLM client`). Run `./mvnw clean` before staging to prevent `target/` artifacts. Pull requests should explain the change, link issues, document required configuration, and attach evidence (curl logs or screenshots) for new endpoints or behaviors.
 
-## Configuration Notes
-Keep environment secrets out of version control; `application.properties` should expose only safe defaults. Document required keys in your PR description and share sample `.env` snippets out-of-band.
+## Security & Configuration Tips
+Never hard-code secrets; supply them via environment-backed `apiKeySupplier` hooks. Limit `application.properties` to non-sensitive defaults and document required environment keys in your PR description. Share sample `.env` guidance out of band when onboarding new contributors.

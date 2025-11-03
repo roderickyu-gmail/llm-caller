@@ -2,43 +2,47 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.hoocta</groupId>
 	<artifactId>llm-caller</artifactId>
-	<version>0.1</version>
+	<version>0.1.1</version>
 	<packaging>jar</packaging>
 
-	<url />
-	<licenses>
-		<license />
-	</licenses>
-	<developers>
-		<developer />
-	</developers>
+	<name>llm-caller</name>
+	<description>Lightweight LLM calling helper library.</description>
+	<url>https://github.com/roderickyu-gmail/llm-caller</url>
+
 	<scm>
-		<connection />
-		<developerConnection />
-		<tag />
-		<url />
+		<url>https://github.com/roderickyu-gmail/llm-caller</url>
+		<connection>scm:git:https://github.com/roderickyu-gmail/llm-caller.git</connection>
+		<developerConnection>
+			scm:git:git@github.com:roderickyu-gmail/llm-caller.git</developerConnection>
+		<tag>HEAD</tag>
 	</scm>
 
+	<licenses>
+		<license>
+			<name>Apache-2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>rod</id>
+			<name>rod</name>
+			<email>dreamhappens@sina.com</email>
+		</developer>
+	</developers>
+
 	<properties>
-		<java.version>21</java.version>
+		<maven.compiler.release>21</maven.compiler.release>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jackson.version>2.17.1</jackson.version>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>fluent-hc</artifactId>
-			<version>4.5.3</version>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
@@ -47,12 +51,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents.core5</groupId>
 			<artifactId>httpcore5</artifactId>
-			<version>5.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<version>4.3.5</version>
+			<version>5.2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -67,40 +66,83 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
-			<version>2.12.3</version>
+			<version>${jackson.version}</version>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>3.1.2</version>
-				<configuration>
-					<skip>false</skip>
-					<uniqueVersion>true</uniqueVersion>
-					<updateReleaseInfo>true</updateReleaseInfo>
-					<retryFailedDeploymentCount>3</retryFailedDeploymentCount>
-				</configuration>
-			</plugin>
+			<!-- Java 版本 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.13.0</version>
 				<configuration>
-					<release>21</release>
+					<release>${maven.compiler.release}</release>
+				</configuration>
+			</plugin>
+
+			<!-- Central 必需：sources.jar -->
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Central 必需：javadoc.jar（关闭 doclint 防止报错） -->
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<additionalOptions>-Xdoclint:none</additionalOptions>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- 用 GPG 给所有构件签名 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>3.2.4</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+						<!-- 不要在这里放明文口令；用 gpg-agent 或环境变量 -->
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- 新流程：Central Portal 发布插件（取 credentials from serverId=central） -->
+			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.8.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>central</publishingServerId>
+					<!-- 全自动发布可打开下面两行（可先手动 Publish 更安心） -->
+					<!-- <autoPublish>true</autoPublish> -->
+					<!-- <waitUntil>published</waitUntil> -->
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-
-	<!--
-  <distributionManagement>
-    <repository>
-      <id>github</id>
-      <url>https://maven.pkg.github.com/roderickyu-gmail/llm-requester</url>
-    </repository>
-  </distributionManagement>
-  -->
 </project>

@@ -3,11 +3,11 @@
 Reusable Java library that wraps OpenAI-compatible chat-completion APIs behind a configurable client. The code in this repository focuses on request construction, retry/failover orchestration, and response parsing so that consuming projects can supply their own LLM endpoints, secrets, and tuning parameters without copying logic.
 
 ## Architecture In A Nutshell
-- `com.xmb.llm.requester.core.config`: builders for `LLMEndpoint`, `LLMRequestOptions`, and `LLMClientConfiguration`. They describe **where** to call and which defaults to apply.
-- `com.xmb.llm.requester.core.LLMClient`: high-level orchestrator. Handles retries, failover between endpoint tiers, streaming flags, and token usage aggregation.
-- `com.xmb.llm.requester.core.common.*`: family of typed requesters (plain text, booleans, list parsers, JSON, etc.) that reuse `LLMClient` and parse tagged responses into domain-friendly shapes.
-- `com.xmb.llm.requester.http.*`: Apache HttpClient wrappers that execute the actual HTTPS requests.
-- `com.xmb.llm.requester.utils.*`: shared helpers (JSON, crypto, threading, logging) reused throughout the codebase.
+- `com.hoocta.llm.requester.core.config`: builders for `LLMEndpoint`, `LLMRequestOptions`, and `LLMClientConfiguration`. They describe **where** to call and which defaults to apply.
+- `com.hoocta.llm.requester.core.LLMClient`: high-level orchestrator. Handles retries, failover between endpoint tiers, streaming flags, and token usage aggregation.
+- `com.hoocta.llm.requester.core.common.*`: family of typed requesters (plain text, booleans, list parsers, JSON, etc.) that reuse `LLMClient` and parse tagged responses into domain-friendly shapes.
+- `com.hoocta.llm.requester.http.*`: Apache HttpClient wrappers that execute the actual HTTPS requests.
+- `com.hoocta.llm.requester.utils.*`: shared helpers (JSON, crypto, threading, logging) reused throughout the codebase.
 
 Everything is built around OpenAI’s chat-completion schema: messages (`Message`), parameters (`OpenAIParams`), responses (`OpenAIResponseSuccessResult` / `OpenAIErrorResult`).
 
@@ -97,5 +97,5 @@ If you prefer dependency injection, create `new FixedPlainTextAIRequester(client
 
 ## Getting Help
 - Read `AGENTS.md` for contributor guidelines.
-- See `com.xmb.llm.requester.core.common` for additional requester flavors and parsing examples.
+- See `com.hoocta.llm.requester.core.common` for additional requester flavors and parsing examples.
 - Issues and PRs should document the endpoint configuration you used and include screenshots or logs of new behaviours.
