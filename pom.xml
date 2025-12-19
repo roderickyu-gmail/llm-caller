@@ -81,7 +81,6 @@
 					<release>${maven.compiler.release}</release>
 				</configuration>
 			</plugin>
-
 			<!-- Central 必需：sources.jar -->
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
@@ -113,36 +112,17 @@
 				</executions>
 			</plugin>
 
-			<!-- 用 GPG 给所有构件签名 -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>3.2.4</version>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-						<!-- 不要在这里放明文口令；用 gpg-agent 或环境变量 -->
-					</execution>
-				</executions>
-			</plugin>
 
-			<!-- 新流程：Central Portal 发布插件（取 credentials from serverId=central） -->
-			<plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
-				<version>0.8.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<publishingServerId>central</publishingServerId>
-					<!-- 全自动发布可打开下面两行（可先手动 Publish 更安心） -->
-					<!-- <autoPublish>true</autoPublish> -->
-					<!-- <waitUntil>published</waitUntil> -->
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
+
+	<distributionManagement>
+		<repository>
+			<!-- 须与 settings.xml 中 server 的 id 一致 -->
+			<id>thebeyondthegain-privatelibs</id>
+			<name>thebeyondthegain-privatelibs</name>
+			<url>https://maven.cnb.cool/thebeyondthegain/privatelibs/-/packages/</url>
+		</repository>
+	</distributionManagement>
+
 </project>
