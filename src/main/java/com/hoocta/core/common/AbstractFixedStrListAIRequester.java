@@ -2,6 +2,11 @@ package com.hoocta.core.common;
 
 import java.util.List;
 
+import com.hoocta.core.LLMClient;
+import com.hoocta.core.LLMClientRegistry;
+import com.hoocta.core.config.LLMClientConfiguration;
+import com.hoocta.core.config.LLMEndpoint;
+import com.hoocta.core.config.LLMRequestOptions;
 import com.hoocta.llm.constants.AITags;
 import com.hoocta.utils.CollectionUtils;
 import com.hoocta.utils.JsonRepair;
@@ -74,11 +79,46 @@ public abstract class AbstractFixedStrListAIRequester extends AbstractFixedForma
 	public abstract boolean isListCanBeEmpty();
 
 	public static void main(String[] args) {
-
+		LLMClient client = buildClientFromEnv();
+		LLMClientRegistry.setDefault(client);
 		FixedStrListAIRequester SR = FixedStrListAIRequester.getInstance();
-		List<String> list = SR.complete("", "列举 5 种水果", "水果名", false);
+		List<String> list = SR.complete("", "列举 5 种水果", "水果名", false, false);
 		CollectionUtils.print(list);
 		System.exit(0);
 	
+	}
+
+	private static LLMClient buildClientFromEnv() {
+		LLMEndpoint standardEndpoint = LLMEndpoint.builder()
+				.name(envOrDefault("LLM_ENDPOINT_NAME", "standard"))
+				.baseUrl(requiredEnv("LLM_BASE_URL"))
+				.model(requiredEnv("LLM_MODEL"))
+				.apiKeySupplier(() -> System.getenv("LLM_API_KEY"))
+				.defaultOptions(LLMRequestOptions.builder().temperature(0.2f).build())
+				.build();
+		LLMClientConfiguration configuration = LLMClientConfiguration.builder()
+				.standardEndpoint(standardEndpoint)
+				.defaultOptions(LLMRequestOptions.builder().maxTokens(512).build())
+				.build();
+		return LLMClient.builder(configuration)
+				.maxAttemptsPerEndpoint(5)
+				.trackUsage(true)
+				.build();
+	}
+
+	private static String requiredEnv(String name) {
+		String value = System.getenv(name);
+		if (StringUtils.isBlank(value)) {
+			throw new IllegalStateException("Missing required env var: " + name);
+		}
+		return value;
+	}
+
+	private static String envOrDefault(String name, String fallback) {
+		String value = System.getenv(name);
+		if (StringUtils.isBlank(value)) {
+			return fallback;
+		}
+		return value;
 	}
 }
