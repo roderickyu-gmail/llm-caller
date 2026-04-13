@@ -65,9 +65,19 @@ public class OpenAIBasedRequester {
         }
         ServiceHttpResponse response = ServiceRequester.post(endpoint.getBaseUrl(), headers, null, JsonUtils.toJson(params), longTimeoutClient, stream);
         String responseContent = response.getResponseContent();
+        if (response.getStatus() < 200 || response.getStatus() >= 300) {
+            throw new ServiceException(com.hoocta.llm.constants.BizCode.SERVER_BUSY,
+                    "OpenAI-compatible LLM API failed status=" + response.getStatus()
+                            + ", endpoint=" + endpoint
+                            + ", body=" + responseContent
+                            + ", conversationId=" + conversationId);
+        }
         if (StringUtils.isBlank(responseContent)) {
             LogUtils.log("Response Null or Empty value: " + responseContent + ". Conversation Id: " + conversationId);
-            throw new ServiceException(com.hoocta.llm.constants.BizCode.SERVER_BUSY);
+            throw new ServiceException(com.hoocta.llm.constants.BizCode.SERVER_BUSY,
+                    "OpenAI-compatible LLM API returned empty response, status=" + response.getStatus()
+                            + ", endpoint=" + endpoint
+                            + ", conversationId=" + conversationId);
         }
         LogUtils.log("Raw response(" + conversationId + "): " + responseContent);
         OpenAIResponseResult result = OpenAIResponseResult.buildResult(responseContent, stream);
@@ -86,7 +96,7 @@ public class OpenAIBasedRequester {
             return null;
         }
         if (options != null && Boolean.TRUE.equals(options.getStream())) {
-            throw new ServiceException(com.hoocta.llm.constants.BizCode.SERVER_BUSY, "Native LLM endpoints do not support stream mode yet. ConversationId: " + conversationId);
+            LogUtils.log("Native LLM endpoint ignores stream=true and uses synchronous response mode. ConversationId: " + conversationId);
         }
 
         Map<String, String> headers = new HashMap<>();
@@ -107,9 +117,19 @@ public class OpenAIBasedRequester {
 
         ServiceHttpResponse response = ServiceRequester.post(endpoint.getBaseUrl(), headers, null, requestBody, longTimeoutClient, false);
         String responseContent = response.getResponseContent();
+        if (response.getStatus() < 200 || response.getStatus() >= 300) {
+            throw new ServiceException(com.hoocta.llm.constants.BizCode.SERVER_BUSY,
+                    "Native LLM API failed status=" + response.getStatus()
+                            + ", endpoint=" + endpoint
+                            + ", body=" + responseContent
+                            + ", conversationId=" + conversationId);
+        }
         if (StringUtils.isBlank(responseContent)) {
             LogUtils.log("Response Null or Empty value: " + responseContent + ". Conversation Id: " + conversationId);
-            throw new ServiceException(com.hoocta.llm.constants.BizCode.SERVER_BUSY);
+            throw new ServiceException(com.hoocta.llm.constants.BizCode.SERVER_BUSY,
+                    "Native LLM API returned empty response, status=" + response.getStatus()
+                            + ", endpoint=" + endpoint
+                            + ", conversationId=" + conversationId);
         }
         LogUtils.log("Raw response(" + conversationId + "): " + responseContent);
 

@@ -97,6 +97,7 @@ public class ServiceRequester {
 		ServiceHttpResponse serviceResponse = new ServiceHttpResponse();
 		try {
 			httpClient.execute(request, response -> {
+				serviceResponse.setStatus(response.getCode());
 				HttpEntity entity = response.getEntity();
 				if (stream) {
 					// 读取响应流并按行处理
@@ -122,7 +123,7 @@ public class ServiceRequester {
 				} else {
 					try {
 						// 强制读取响应内容
-						String rawResponse = EntityUtils.toString(entity, StandardCharsets.UTF_8);
+						String rawResponse = entity == null ? "" : EntityUtils.toString(entity, StandardCharsets.UTF_8);
 						serviceResponse.setResponse(rawResponse);
 					} catch (ServiceException e) {
 						e.printStackTrace();
@@ -136,7 +137,7 @@ public class ServiceRequester {
 			return serviceResponse;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ServiceException(BizCode.SERVER_BUSY);
+			throw new ServiceException(e, BizCode.SERVER_BUSY, "HTTP request failed: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 		}
 		
 	}

@@ -12,6 +12,7 @@ public class ServiceException extends Exception {
 	}
 
 	public ServiceException(int code, String... array) {
+		super(array == null || array.length == 0 ? null : String.join(", ", array));
 		this.code = code;
 		this.array = array;
 	}

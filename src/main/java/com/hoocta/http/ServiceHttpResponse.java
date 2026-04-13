@@ -40,6 +40,9 @@ public class ServiceHttpResponse{
 	public int getStatus() {
 		return status;
 	}
+	public void setStatus(int status) {
+		this.status = status;
+	}
 	public String getResponseContent() throws ServiceException {
 		return this.content;
 	}
