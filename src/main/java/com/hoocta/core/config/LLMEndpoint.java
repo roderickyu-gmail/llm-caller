@@ -20,6 +20,7 @@ public final class LLMEndpoint {
     private final Map<String, String> headers;
     private final LLMRequestOptions defaultOptions;
     private final boolean longTimeout;
+    private final ApiFormat apiFormat;
 
     private LLMEndpoint(Builder builder) {
         this.name = builder.name;
@@ -29,6 +30,7 @@ public final class LLMEndpoint {
         this.headers = Collections.unmodifiableMap(new LinkedHashMap<>(builder.headers));
         this.defaultOptions = builder.defaultOptions;
         this.longTimeout = builder.longTimeout;
+        this.apiFormat = builder.apiFormat;
     }
 
     public static Builder builder() {
@@ -72,6 +74,10 @@ public final class LLMEndpoint {
         return longTimeout;
     }
 
+    public ApiFormat getApiFormat() {
+        return apiFormat;
+    }
+
     private String safeName() {
         return name == null ? model : name;
     }
@@ -84,7 +90,14 @@ public final class LLMEndpoint {
             ", model='" + model + '\'' +
             ", headers=" + headers.keySet() +
             ", longTimeout=" + longTimeout +
+            ", apiFormat=" + apiFormat +
             '}';
+    }
+
+    public enum ApiFormat {
+        OPENAI_CHAT_COMPLETIONS,
+        GOOGLE_NATIVE_GENERATE_CONTENT,
+        CLAUDE_MESSAGES
     }
 
     public static final class Builder {
@@ -95,6 +108,7 @@ public final class LLMEndpoint {
         private Map<String, String> headers = new LinkedHashMap<>();
         private LLMRequestOptions defaultOptions;
         private boolean longTimeout = true;
+        private ApiFormat apiFormat = ApiFormat.OPENAI_CHAT_COMPLETIONS;
 
         private Builder() {
         }
@@ -148,6 +162,11 @@ public final class LLMEndpoint {
             return this;
         }
 
+        public Builder apiFormat(ApiFormat apiFormat) {
+            this.apiFormat = Objects.requireNonNull(apiFormat, "apiFormat");
+            return this;
+        }
+
         public LLMEndpoint build() {
             if (baseUrl == null || baseUrl.isBlank()) {
                 throw new IllegalArgumentException("baseUrl must not be blank");
@@ -156,6 +175,7 @@ public final class LLMEndpoint {
                 throw new IllegalArgumentException("model must not be blank");
             }
             Objects.requireNonNull(apiKeySupplier, "apiKeySupplier");
+            Objects.requireNonNull(apiFormat, "apiFormat");
             return new LLMEndpoint(this);
         }
     }
